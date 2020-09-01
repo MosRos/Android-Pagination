@@ -1,9 +1,12 @@
-package com.morostami.androidpagination
+package com.morostami.androidpagination.presentation.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import com.morostami.androidpagination.ui.paging_3.Paging3Fragment
+import com.morostami.androidpagination.R
+import com.morostami.androidpagination.presentation.ui.jetpack_paging.Paging3Fragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {

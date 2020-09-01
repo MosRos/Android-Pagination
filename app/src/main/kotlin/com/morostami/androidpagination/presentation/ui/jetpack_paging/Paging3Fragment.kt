@@ -1,4 +1,4 @@
-package com.morostami.androidpagination.ui.paging_3
+package com.morostami.androidpagination.presentation.ui.jetpack_paging
 
 import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle

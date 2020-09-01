@@ -1,4 +1,4 @@
-package com.morostami.androidpagination.ui.manual_pagination
+package com.morostami.androidpagination.presentation.ui.manual_pagination
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,8 +7,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.morostami.androidpagination.R
-import com.morostami.androidpagination.ui.paging_3.Paging3Fragment
-import com.morostami.androidpagination.ui.paging_3.Paging3ViewModel
 
 class ManualPaginationFragment : Fragment() {
 

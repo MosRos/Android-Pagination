@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.paging_3.Paging3Fragment">
+    tools:context=".presentation.ui.jetpack_paging.Paging3Fragment">
 
     <TextView
         android:id="@+id/message"
