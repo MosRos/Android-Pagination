@@ -19,6 +19,10 @@ import com.morostami.androidpagination.data.remote.RemoteDataSource
 import com.morostami.androidpagination.data.remote.responses.CoinGeckoApiError
 import com.morostami.androidpagination.data.utils.NetworkUtils
 import com.morostami.androidpagination.domain.model.RankedCoin
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import timber.log.Timber
 import java.io.IOException
@@ -41,29 +45,29 @@ class MarketRanksMediator @Inject constructor(
         loadType: LoadType,
         state: PagingState<Int, RankedCoin>
     ): MediatorResult {
+
         val page = when (loadType) {
             LoadType.REFRESH -> {
                 val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
                 remoteKeys?.nextKey?.minus(1) ?: COINGECKO_STARTING_PAGE_INDEX
             }
             LoadType.PREPEND -> {
-                val remoteKeys: CoinsRemoteKeys = getRemoteKeyForFirstItem(state)
-                    ?: // The LoadType is PREPEND so some data was loaded before,
+                val remoteKeys: CoinsRemoteKeys? = getRemoteKeyForFirstItem(state) // The LoadType is PREPEND so some data was loaded before,
                     // so we should have been able to get remote keys
                     // If the remoteKeys are null, then we're an invalid state and we have a bug
-                    throw InvalidObjectException("Remote key and the prevKey should not be null")
+//                    throw InvalidObjectException("Remote key and the prevKey should not be null")
                 // If the previous key is null, then we can't request more data
-                val prevKey = remoteKeys.prevKey ?: return MediatorResult.Success(
+                val prevKey = remoteKeys?.prevKey ?: return MediatorResult.Success(
                     endOfPaginationReached = true
                 )
-                remoteKeys.prevKey
+                remoteKeys?.prevKey
             }
             LoadType.APPEND -> {
                 val remoteKeys = getRemoteKeyForLastItem(state)
                 if (remoteKeys?.nextKey == null) {
                     throw InvalidObjectException("Remote key should not be null for $loadType")
                 }
-                remoteKeys.nextKey
+                remoteKeys?.nextKey
             }
 
         }
@@ -94,10 +98,14 @@ class MarketRanksMediator @Inject constructor(
                 )
             }
             keys?.apply {
-                marketLocalDataSource.insertAllCoinsRemoteKeys(keys)
+                withContext(Dispatchers.IO) {
+                    marketLocalDataSource.insertAllRemoteKeys(keys)
+                }
             }
             rankedCoins?.apply {
-                marketLocalDataSource.insertRankedCoins(rankedCoins)
+                withContext(Dispatchers.IO) {
+                    marketLocalDataSource.insertRankedCoins(rankedCoins)
+                }
             }
 
             return MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
@@ -113,7 +121,7 @@ class MarketRanksMediator @Inject constructor(
         }
     }
 
-    private suspend fun fetchNetworkData(page: Int, pageSize: Int) : List<RankedCoin>? {
+    private suspend fun   fetchNetworkData(page: Int, pageSize: Int) : List<RankedCoin>? {
         var result: List<RankedCoin>? = null
         val response: NetworkResponse<List<RankedCoin>, CoinGeckoApiError> = remoteDataSource.getPagedMarketRanks(
             "usd",
@@ -121,7 +129,18 @@ class MarketRanksMediator @Inject constructor(
             pageSize
         )
         result = when(response) {
-            is NetworkResponse.Success -> response.body
+            is NetworkResponse.Success -> {
+                GlobalScope.async(Dispatchers.IO){
+                    response.body.forEach { rank ->
+                        marketLocalDataSource.insertRemoteKey(CoinsRemoteKeys(
+                            coin_Id = rank.id,
+                            prevKey = if (page > 1) page -1 else -1,
+                            nextKey = page + 1
+                        ))
+                    }
+                }
+                response.body
+            }
             else -> null
         }
 

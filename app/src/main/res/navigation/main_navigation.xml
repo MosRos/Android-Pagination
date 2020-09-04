@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_navigation"
+    app:startDestination="@id/fragment_home">
+    <fragment
+        android:id="@+id/fragment_home"
+        android:name="com.morostami.androidpagination.presentation.ui.home.HomeFragment"
+        android:label="@string/home"
+        tools:layout="@layout/fragment_home" >
+        <action
+            android:id="@+id/action_fragment_home_to_fragment_paging"
+            app:destination="@id/fragment_paging" />
+        <action
+            android:id="@+id/action_fragment_home_to_fragment_manual"
+            app:destination="@id/fragment_manual" />
+    </fragment>
+    <fragment
+        android:id="@+id/fragment_paging"
+        android:name="com.morostami.androidpagination.presentation.ui.jetpack_paging.Paging3Fragment"
+        android:label="@string/jetpack_paging"
+        tools:layout="@layout/fragment_home" />
+    <fragment
+        android:id="@+id/fragment_manual"
+        android:name="com.morostami.androidpagination.presentation.ui.manual_pagination.ManualPaginationFragment"
+        android:label="@string/manual_pagination"
+        tools:layout="@layout/fragment_home" />
+</navigation>

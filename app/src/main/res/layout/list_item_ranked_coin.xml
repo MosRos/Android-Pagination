@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+                name="rankedCoin"
+                type="com.morostami.androidpagination.domain.model.RankedCoin" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/root_layout"
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="0dp">
+
+        <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/coinImg"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="5dp"
+                android:background="@android:color/transparent"
+                android:scaleType="centerInside"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/rankTxt"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@id/coinSymbolTxt"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:setImageUrl="@{rankedCoin.image}" />
+        <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/rankTxt"
+                android:layout_width="0dp"
+                android:layout_height="32dp"
+                android:background="@android:color/transparent"
+                style="@style/TextAppearance.PercentChance"
+                tools:text="1"
+                app:layout_constraintStart_toStartOf="@id/coinImg"
+                app:layout_constraintEnd_toEndOf="@id/coinImg"
+                app:layout_constraintTop_toBottomOf="@id/coinImg"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:text="@{Integer.toString(rankedCoin.marketCapRank)}"/>
+
+        <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/coinSymbolTxt"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                style="@style/TextAppearance.CoinSymbol"
+                android:background="@android:color/transparent"
+                android:text="@{rankedCoin.symbol.toUpperCase()}"
+                android:singleLine="true"
+                app:layout_constraintStart_toEndOf="@id/coinImg"
+                app:layout_constraintEnd_toStartOf="@id/currentPriceTxt"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/coinNameTxt"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintHorizontal_weight="2"
+                app:layout_constraintVertical_chainStyle="spread"
+                app:layout_constraintVertical_weight="2"
+                tools:text="BTC" />
+        <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/coinNameTxt"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@android:color/transparent"
+                style="@style/TextAppearance.CoinNameSubtitle"
+                android:singleLine="true"
+                tools:text="Bitcoin"
+                app:layout_constraintStart_toStartOf="@id/coinSymbolTxt"
+                app:layout_constraintEnd_toEndOf="@id/coinSymbolTxt"
+                app:layout_constraintTop_toBottomOf="@id/coinSymbolTxt"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintVertical_chainStyle="spread"
+                app:layout_constraintVertical_weight="1"
+                android:text="@{rankedCoin.name}"
+                />
+        <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/currentPriceTxt"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@android:color/transparent"
+                style="@style/TextAppearance.CoinPrice"
+                android:singleLine="true"
+                tools:text="$ 7192.3"
+                app:layout_constraintStart_toEndOf="@id/coinSymbolTxt"
+                app:layout_constraintEnd_toStartOf="@id/pricePercentChange"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/last24hPriceChange"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintHorizontal_weight="2"
+                app:layout_constraintVertical_chainStyle="spread"
+                app:layout_constraintVertical_weight="2"
+                android:text="@{Double.toString(rankedCoin.currentPrice)}"
+                />
+        <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/last24hPriceChange"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@android:color/transparent"
+                style="@style/TextAppearance.CoinNameSubtitle"
+                android:singleLine="true"
+                tools:text="$ -79.6"
+                app:layout_constraintStart_toStartOf="@id/currentPriceTxt"
+                app:layout_constraintEnd_toEndOf="@id/currentPriceTxt"
+                app:layout_constraintTop_toBottomOf="@id/currentPriceTxt"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintVertical_chainStyle="spread"
+                app:layout_constraintVertical_weight="1"
+                android:text="@{Double.toString(rankedCoin.priceChange24h)}"
+                />
+
+        <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/pricePercentChange"
+                style="@style/TextAppearance.PercentChance"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:background="@android:color/transparent"
+                android:text="@{Double.toString(rankedCoin.priceChangePercentage24h)}"
+                android:singleLine="true"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@id/currentPriceTxt"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintHorizontal_weight="1"
+                tools:text="-2.23" />
+        <View
+                android:layout_width="match_parent"
+                android:layout_height="0.7dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+            android:background="?attr/as_dividerColor"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

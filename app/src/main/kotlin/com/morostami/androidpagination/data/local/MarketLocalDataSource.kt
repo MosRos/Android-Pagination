@@ -9,12 +9,13 @@
 package com.morostami.androidpagination.data.local
 
 import androidx.paging.PagingSource
+import com.morostami.androidpagination.data.local.dao.RemoteKeysDao
 import com.morostami.androidpagination.domain.model.CoinsRemoteKeys
 import com.morostami.androidpagination.domain.model.RankedCoin
 import javax.inject.Inject
 
 class MarketLocalDataSource @Inject constructor(
-    private val cryptoDataBase: CryptoDataBase) {
+    private val cryptoDataBase: CryptoDataBase) : RemoteKeysDao {
 
     private val cryptoMarketDao by lazy { cryptoDataBase.cryptoMarketDao() }
     private val remoteKeysDao by lazy { cryptoDataBase.remoteKeysDao() }
@@ -36,9 +37,13 @@ class MarketLocalDataSource @Inject constructor(
 
     suspend fun deleteAllRankedCoins() = cryptoMarketDao.deleteAllRankedCoins()
 
-    suspend fun insertAllCoinsRemoteKeys(remoteKeys: List<CoinsRemoteKeys>) = remoteKeysDao.insertAllRemoteKeys(remoteKeys)
-
     suspend fun getRemoteKeysCoinId(coinId: String): CoinsRemoteKeys? = remoteKeysDao.remoteKeysCoinId(coinId)
 
-    suspend fun clearCoinsRemoteKeys() = remoteKeysDao.clearCoinsRemoteKeys()
+    override suspend fun insertAllRemoteKeys(remoteKeys: List<CoinsRemoteKeys>) = remoteKeysDao.insertAllRemoteKeys(remoteKeys)
+
+    override suspend fun insertRemoteKey(remoteKey: CoinsRemoteKeys) = remoteKeysDao.insertRemoteKey(remoteKey)
+
+    override suspend fun remoteKeysCoinId(coinId: String): CoinsRemoteKeys? = remoteKeysDao.remoteKeysCoinId(coinId)
+
+    override suspend fun clearCoinsRemoteKeys() = remoteKeysDao.clearCoinsRemoteKeys()
 }

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <!--Top level DayNight theme to be used in AndroidManifest.xml-->
+    <style name="Sample.DayNight" parent="Base.Sample" />
+
+    <!--Base custom theme which will be shared between both light and dark theme variants-->
+    <style name="Base.Sample" parent="Base.MaterialThemeBuilder">
+        <!--Material color attributes -->
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorPrimaryVariant">@color/color_primary_variant</item>
+        <item name="colorSecondary">@color/color_secondary</item>
+        <item name="colorSecondaryVariant">@color/color_secondary_variant</item>
+
+        <item name="android:colorBackground">@color/color_background</item>
+        <item name="colorSurface">@color/color_surface</item>
+        <item name="colorError">@color/color_error</item>
+
+        <item name="colorOnPrimary">@color/color_on_primary</item>
+        <item name="colorOnSecondary">@color/color_on_secondary</item>
+        <item name="backgroundColor">@color/color_background</item>
+        <item name="colorOnBackground">@color/color_on_background</item>
+        <item name="colorOnSurface">@color/color_on_surface</item>
+        <item name="colorOnError">@color/color_on_error</item>
+        <item name="android:textColorPrimary">#ffffff</item>
+        <item name="android:editTextColor">#ffffff</item>
+
+        <item name="android:textColor">@color/text_color_primary</item>
+        <item name="as_txtColorPrimary">@color/text_color_primary</item>
+        <item name="as_txtColorSecondary">@color/text_color_secondary</item>
+        <item name="android:textColorLink">@color/color_primary_variant</item>
+        <item name="android:textColorLinkInverse">@color/color_secondary_variant</item>
+
+        <item name="as_dividerColor">@color/divider_color</item>
+        <item name="as_elementBackgroundColor">@color/element_background_color</item>
+        <item name="android:statusBarColor">@color/color_surface</item>
+<!--        <item name="android:windowLightStatusBar">false</item>-->
+        <item name="android:overScrollMode">never</item>
+        <item name="android:navigationBarDividerColor" tools:ignore="NewApi">
+            @color/color_surface
+        </item>
+    </style>
+
+
+
+    <style name="Base.MaterialThemeBuilder" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@color/color_surface</item>
+<!--        <item name="android:windowLightStatusBar">true</item>-->
+        <item name="android:navigationBarColor">@color/color_surface</item>
+        <item name="android:windowLightNavigationBar" tools:ignore="NewApi">true</item>
+        <item name="android:navigationBarDividerColor" tools:ignore="NewApi">?colorControlHighlight
+        </item>
+
+        <!--Remap legacy AppCompat attributes to MaterialComponent attributes-->
+        <item name="colorPrimaryDark">?colorPrimaryVariant</item>
+        <item name="colorAccent">?colorSecondary</item>
+    </style>
+
+</resources>

@@ -31,9 +31,8 @@ class MarketRanksRepositoryImpl @Inject constructor(
         val pagingFactory = { marketLocalDataSource.getPagedRankedCoins() }
 
         return Pager(
-            config = PagingConfig(pageSize = 50, initialLoadSize = 100, prefetchDistance = 15),
+            config = PagingConfig(pageSize = DEFAULD_PAGE_SIZE, enablePlaceholders = false),
             pagingSourceFactory = pagingFactory,
-            initialKey = 1,
             remoteMediator = marketRanksMediator
         ).flow
     }

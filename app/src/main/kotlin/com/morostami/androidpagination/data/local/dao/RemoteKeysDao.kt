@@ -19,6 +19,9 @@ interface RemoteKeysDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAllRemoteKeys(remoteKey: List<CoinsRemoteKeys>)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRemoteKey(remoteKey: CoinsRemoteKeys)
+
     @Query("SELECT * FROM CoinsRemoteKeys WHERE coin_Id = :coinId")
     suspend fun remoteKeysCoinId(coinId: String): CoinsRemoteKeys?
 

@@ -7,14 +7,19 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.morostami.androidpagination.R
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+
+@AndroidEntryPoint
 class ManualPaginationFragment : Fragment() {
 
     companion object {
         fun newInstance() = ManualPaginationFragment()
     }
 
-    private lateinit var viewModel: ManualPaginationViewModel
+    @Inject
+    lateinit var viewModel: ManualPaginationViewModel
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View {

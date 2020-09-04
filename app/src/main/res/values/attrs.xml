@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- *** archsample theme custom attribute *** -->
+    <attr name="as_dividerColor" format="reference"/>
+    <attr name="as_elementBackgroundColor" format="reference"/>
+    <attr name="as_txtColorPrimary" format="reference"/>
+    <attr name="as_txtColorSecondary" format="reference"/>
+</resources>
