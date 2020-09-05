@@ -38,6 +38,7 @@ class MarketRanksRepositoryImpl @Inject constructor(
     }
 
     override fun getRanks(offset: Int): Flow<Result<List<RankedCoin>>> {
+
         return object : NetworkBoundResource<List<RankedCoin>, List<RankedCoin>, CoinGeckoApiError>(){
             init {
                 limit = DEFAULD_PAGE_SIZE

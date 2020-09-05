@@ -46,28 +46,34 @@ class MarketRanksMediator @Inject constructor(
         state: PagingState<Int, RankedCoin>
     ): MediatorResult {
 
-        val page = when (loadType) {
+        val page: Int = when (loadType) {
             LoadType.REFRESH -> {
                 val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
                 remoteKeys?.nextKey?.minus(1) ?: COINGECKO_STARTING_PAGE_INDEX
             }
             LoadType.PREPEND -> {
-                val remoteKeys: CoinsRemoteKeys? = getRemoteKeyForFirstItem(state) // The LoadType is PREPEND so some data was loaded before,
+                var remoteKeys: CoinsRemoteKeys? = getRemoteKeyForFirstItem(state) // The LoadType is PREPEND so some data was loaded before,
                     // so we should have been able to get remote keys
                     // If the remoteKeys are null, then we're an invalid state and we have a bug
 //                    throw InvalidObjectException("Remote key and the prevKey should not be null")
                 // If the previous key is null, then we can't request more data
+                if (remoteKeys == null) {
+                    remoteKeys = CoinsRemoteKeys( coin_Id = "xxx", prevKey = 1, nextKey = 1)
+                }
                 val prevKey = remoteKeys?.prevKey ?: return MediatorResult.Success(
                     endOfPaginationReached = true
                 )
-                remoteKeys?.prevKey
+                remoteKeys.prevKey as Int
             }
             LoadType.APPEND -> {
-                val remoteKeys = getRemoteKeyForLastItem(state)
-                if (remoteKeys?.nextKey == null) {
-                    throw InvalidObjectException("Remote key should not be null for $loadType")
+                var remoteKeys = getRemoteKeyForLastItem(state)
+//                if (remoteKeys?.nextKey == null) {
+//                    throw InvalidObjectException("Remote key should not be null for $loadType")
+//                }
+                if (remoteKeys == null) {
+                    remoteKeys = CoinsRemoteKeys( coin_Id = "xxx", prevKey = 1, nextKey = 1)
                 }
-                remoteKeys?.nextKey
+                remoteKeys.nextKey as Int
             }
 
         }
@@ -151,9 +157,9 @@ class MarketRanksMediator @Inject constructor(
         // Get the last page that was retrieved, that contained items.
         // From that last page, get the last item
         return state.pages.lastOrNull { it.data.isNotEmpty() }?.data?.lastOrNull()
-            ?.let { repo ->
+            ?.let { rankedCoin ->
                 // Get the remote keys of the last item retrieved
-                marketLocalDataSource.getRemoteKeysCoinId(repo.id)
+                marketLocalDataSource.getRemoteKeysCoinId(rankedCoin.id)
             }
     }
 
@@ -161,9 +167,9 @@ class MarketRanksMediator @Inject constructor(
         // Get the first page that was retrieved, that contained items.
         // From that first page, get the first item
         return state.pages.firstOrNull { it.data.isNotEmpty() }?.data?.firstOrNull()
-            ?.let { repo ->
+            ?.let { rankedCoin ->
                 // Get the remote keys of the first items retrieved
-                marketLocalDataSource.getRemoteKeysCoinId(repo.id)
+                marketLocalDataSource.getRemoteKeysCoinId(rankedCoin.id)
             }
     }
 
@@ -173,8 +179,8 @@ class MarketRanksMediator @Inject constructor(
         // The paging library is trying to load data after the anchor position
         // Get the item closest to the anchor position
         return state.anchorPosition?.let { position ->
-            state.closestItemToPosition(position)?.id?.let { repoId ->
-                marketLocalDataSource.getRemoteKeysCoinId(repoId)
+            state.closestItemToPosition(position)?.id?.let { coinId ->
+                marketLocalDataSource.getRemoteKeysCoinId(coinId)
             }
         }
     }

@@ -1,7 +1,6 @@
 package com.morostami.androidpagination.presentation.ui.jetpack_paging
 
 import android.content.Context
-import androidx.lifecycle.ViewModelProviders
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -35,7 +34,7 @@ class Paging3Fragment : Fragment() {
     private lateinit var mContext: Context
     private lateinit var dataBinding: FragmentMarketRankBinding
     private lateinit var rankRecycler: RecyclerView
-    private lateinit var marketRanksAdapter: MarketRanksAdapter
+    private lateinit var ranksPagingAdapter: RanksPagingAdapter
 
     private val onItemClicked : (RankedCoin, Int) -> Unit = { coin, position ->
         Toast.makeText(context, "${coin.name} at position $position Clicked", Toast.LENGTH_SHORT).show()
@@ -70,13 +69,13 @@ class Paging3Fragment : Fragment() {
         rankRecycler = dataBinding.rankRecycler
         rankRecycler.layoutManager = llManager
 
-        marketRanksAdapter = MarketRanksAdapter(onItemClicked)
-        rankRecycler.adapter = marketRanksAdapter
+        ranksPagingAdapter = RanksPagingAdapter(onItemClicked)
+        rankRecycler.adapter = ranksPagingAdapter
     }
 
     private fun updateRanksAdapter(coins: PagingData<RankedCoin>) {
         viewLifecycleOwner.lifecycleScope.launch {
-            marketRanksAdapter.submitData(coins)
+            ranksPagingAdapter.submitData(coins)
         }
         dataBinding.progressBar.visibility = View.GONE
     }
