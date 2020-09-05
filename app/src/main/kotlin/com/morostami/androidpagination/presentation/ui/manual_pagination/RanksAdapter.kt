@@ -16,8 +16,8 @@ class RanksAdapter(private var onRankedCoinClicked: (RankedCoin, Int) -> Unit) :
                 return (oldItem.id == newItem.id)
             }
 
-            override fun areContentsTheSame(oldItem: RankedCoin, newItem: RankedCoin): Boolean =
-                oldItem.equals(newItem)
+            override fun areContentsTheSame(oldItem: RankedCoin, newItem: RankedCoin): Boolean = false
+//                oldItem.equals(newItem)
         }
     }
 

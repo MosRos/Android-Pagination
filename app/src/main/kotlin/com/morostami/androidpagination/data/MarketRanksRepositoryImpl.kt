@@ -9,10 +9,15 @@ import com.morostami.androidpagination.data.remote.RemoteDataSource
 import com.morostami.androidpagination.data.remote.responses.CoinGeckoApiError
 import com.morostami.androidpagination.domain.MarketRanksRepository
 import com.morostami.androidpagination.domain.base.Result
+import com.morostami.androidpagination.domain.model.CoinsRemoteKeys
 import com.morostami.androidpagination.domain.model.RankedCoin
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
+import java.lang.Exception
 import javax.inject.Inject
 
 class MarketRanksRepositoryImpl @Inject constructor(
@@ -39,38 +44,59 @@ class MarketRanksRepositoryImpl @Inject constructor(
 
     override fun getRanks(offset: Int): Flow<Result<List<RankedCoin>>> {
 
-        return object : NetworkBoundResource<List<RankedCoin>, List<RankedCoin>, CoinGeckoApiError>(){
-            init {
-                limit = DEFAULD_PAGE_SIZE
+        return flow {
+            emit(Result.Loading)
+            val localData = marketLocalDataSource.getRankedCoinsList(offset, PAGE_SIZE)
+            if (!localData.isNullOrEmpty()){
+                emit(Result.Success(localData))
             }
-            override suspend fun getFromDatabase(
-                isRefreshed: Boolean,
-                limit: Int,
-                offset: Int
-            ): List<RankedCoin>? {
-                return marketLocalDataSource.getRankedCoinsList(offset, DEFAULD_PAGE_SIZE)
-            }
+            val networkRespons: NetworkResponse<List<RankedCoin>, CoinGeckoApiError> =
+                remoteDataSource.getPagedMarketRanks(vs_currency = "usd", page = offset, per_page = PAGE_SIZE)
 
-            override suspend fun validateCache(cachedData: List<RankedCoin>?): Boolean {
-                return !cachedData.isNullOrEmpty()
-            }
-
-            override suspend fun getFromApi(): NetworkResponse<List<RankedCoin>, CoinGeckoApiError> {
-                return remoteDataSource.getPagedMarketRanks("usd", offset, DEFAULD_PAGE_SIZE)
-            }
-
-            override suspend fun persistData(apiData: List<RankedCoin>) {
-                withContext(Dispatchers.IO){
-                    apiData.forEach { coin ->
-                        coin?.apply {
-                            pageKey = offset
+            when(networkRespons) {
+                is NetworkResponse.Success -> {
+                    GlobalScope.async(Dispatchers.IO){
+                        networkRespons.body.forEach { rank ->
+                            marketLocalDataSource.insertRankedCoin(rank)
                         }
-                        marketLocalDataSource.insertRankedCoin(coin)
                     }
+                    emit(Result.Success(networkRespons.body))
                 }
+                else -> {emit(Result.Error(Exception("Bla")))}
             }
-
-
-        }.flow()
+        }
+//        return object : NetworkBoundResource<List<RankedCoin>, List<RankedCoin>, CoinGeckoApiError>(){
+//            init {
+//                limit = DEFAULD_PAGE_SIZE
+//            }
+//            override suspend fun getFromDatabase(
+//                isRefreshed: Boolean,
+//                limit: Int,
+//                offset: Int
+//            ): List<RankedCoin>? {
+//                return marketLocalDataSource.getRankedCoinsList(offset, DEFAULD_PAGE_SIZE)
+//            }
+//
+//            override suspend fun validateCache(cachedData: List<RankedCoin>?): Boolean {
+//                return !cachedData.isNullOrEmpty()
+//            }
+//
+//            override suspend fun getFromApi(): NetworkResponse<List<RankedCoin>, CoinGeckoApiError> {
+//                return remoteDataSource.getPagedMarketRanks("usd", offset, DEFAULD_PAGE_SIZE)
+//            }
+//
+//            override suspend fun persistData(apiData: List<RankedCoin>) {
+//                withContext(Dispatchers.IO){
+//                    apiData.forEach { coin ->
+//                        coin?.apply {
+//                            pageKey = offset
+//                        }
+//                        marketLocalDataSource.insertRankedCoin(coin)
+//                    }
+//                }
+//            }
+//
+//
+//        }.flow()
     }
 }

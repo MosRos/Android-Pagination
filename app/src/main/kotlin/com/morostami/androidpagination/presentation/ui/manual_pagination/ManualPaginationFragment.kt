@@ -10,16 +10,13 @@ import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProviders
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.morostami.androidpagination.R
 import com.morostami.androidpagination.databinding.FragmentMarketRankBinding
 import com.morostami.androidpagination.domain.model.RankedCoin
-import com.morostami.androidpagination.presentation.ui.jetpack_paging.RanksPagingAdapter
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -40,7 +37,6 @@ class ManualPaginationFragment : Fragment(), LoadMoreObserver {
     private lateinit var ranksAdapter: RanksAdapter
     private lateinit var endlessScrollListener: EndlessScrollListener
     private var recyclerviewState: Parcelable? = null
-    private var venEntities: ArrayList<RankedCoin> = ArrayList()
 
     private val onCoinClicked: (RankedCoin, Int) -> Unit = { coin, position ->
         Toast.makeText(context, "${coin.name} clicked at $position", Toast.LENGTH_SHORT).show()
@@ -65,17 +61,19 @@ class ManualPaginationFragment : Fragment(), LoadMoreObserver {
         ranksAdapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.ALLOW
 
         val llManager = LinearLayoutManager(mContext, RecyclerView.VERTICAL, false)
+        endlessScrollListener = EndlessScrollListener(
+            layoutManager = llManager,
+            visibleThreshold = 5,
+            includeEmptyState = false,
+            loadMoreObserver = this)
 
         rankRecycler = dataBinding.rankRecycler
         with(rankRecycler) {
             layoutManager = llManager
+            addOnScrollListener(endlessScrollListener)
             adapter = ranksAdapter
             this.disableAnimation()
         }
-
-        endlessScrollListener = EndlessScrollListener(layoutManager = llManager, visibleThreshold = 5, includeEmptyState = false, loadMoreObserver = this)
-
-        rankRecycler.addOnScrollListener(endlessScrollListener)
     }
 
     private fun setObservables() {
@@ -105,7 +103,6 @@ class ManualPaginationFragment : Fragment(), LoadMoreObserver {
         }
     }
 
-    @InternalCoroutinesApi
     override fun onLoadMore(currentPage: Int) {
         Toast.makeText(mContext, "request next page ${currentPage+1}", Toast.LENGTH_SHORT).show()
         viewModel.getRanks(currentPage+1)
