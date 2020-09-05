@@ -17,12 +17,15 @@ class RanksAdapter(private var onRankedCoinClicked: (RankedCoin, Int) -> Unit) :
             }
 
             override fun areContentsTheSame(oldItem: RankedCoin, newItem: RankedCoin): Boolean =
-                oldItem == newItem
+                oldItem.equals(newItem)
         }
     }
 
     override fun onBindViewHolder(holder: RankedCoinViewHolder, position: Int) {
-        holder.bind(getItem(position), position, onRankedCoinClicked)
+        val coin: RankedCoin? = getItem(position)
+        coin?.let {
+            holder.bind(coin, position, onRankedCoinClicked)
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RankedCoinViewHolder {

@@ -56,6 +56,7 @@ class ManualPaginationFragment : Fragment(), LoadMoreObserver {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initWidgets()
+        viewModel.getRanks(1)
         setObservables()
     }
 
