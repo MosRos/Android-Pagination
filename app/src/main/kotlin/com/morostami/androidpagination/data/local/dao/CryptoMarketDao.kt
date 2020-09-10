@@ -25,7 +25,7 @@ interface CryptoMarketDao {
     @Query("SELECT * FROM COINS ORDER BY marketCapRank ASC")
     suspend fun getAllRankedCoins(): List<RankedCoin>
 
-    @Query("SELECT * FROM COINS ORDER BY pageKey LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM COINS ORDER BY marketCapRank ASC LIMIT :limit OFFSET :offset")
     suspend fun getRankedCoinsList(offset: Int, limit: Int): List<RankedCoin>
 
     @Query("SELECT * FROM COINS ORDER BY marketCapRank ASC")

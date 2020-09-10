@@ -17,6 +17,7 @@ class RankedCoinViewHolder(val databinding: ListItemRankedCoinBinding) : Recycle
     val rootLayout: View = databinding.rootLayout
 
     fun bind(rankedCoin: RankedCoin, position: Int, onRankedCoinClick: (RankedCoin, Int) -> Unit) {
+
         rootLayout.setOnClickListener {
             onRankedCoinClick.invoke(rankedCoin, position)
         }

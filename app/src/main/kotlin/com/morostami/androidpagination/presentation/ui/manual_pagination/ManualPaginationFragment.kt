@@ -37,6 +37,7 @@ class ManualPaginationFragment : Fragment(), LoadMoreObserver {
     private lateinit var ranksAdapter: RanksAdapter
     private lateinit var endlessScrollListener: EndlessScrollListener
     private var recyclerviewState: Parcelable? = null
+    private var coins: ArrayList<RankedCoin> = ArrayList()
 
     private val onCoinClicked: (RankedCoin, Int) -> Unit = { coin, position ->
         Toast.makeText(context, "${coin.name} clicked at $position", Toast.LENGTH_SHORT).show()
@@ -79,7 +80,11 @@ class ManualPaginationFragment : Fragment(), LoadMoreObserver {
     private fun setObservables() {
         viewModel.marketRanks.observe(viewLifecycleOwner, Observer { ranks ->
             ranks?.let {
-                updateRecycler(ranks)
+                coins.addAll(ranks)
+                coins.sortBy { rankedCoin ->
+                    rankedCoin.marketCapRank
+                }
+                updateRecycler(coins)
             }
         })
     }
@@ -89,18 +94,24 @@ class ManualPaginationFragment : Fragment(), LoadMoreObserver {
             viewModel.getRanks(1)
             return
         }
-
+        var sortedCoins: List<RankedCoin> = items.distinctBy { rankedCoin ->
+            rankedCoin.id
+        }
         recyclerviewState = rankRecycler.layoutManager?.onSaveInstanceState()
+        ranksAdapter.submitList(sortedCoins)
+        rankRecycler.layoutManager?.let {llmanager ->
+            llmanager.onRestoreInstanceState(recyclerviewState)
+        }
 
         // for smooth performance
-        lifecycleScope.launch {
-//            venueListAdapter.setState(LoadingState.LOADED)
-            delay(50)
-            ranksAdapter.submitList(items)
-            rankRecycler.layoutManager?.let {llmanager ->
-                llmanager.onRestoreInstanceState(recyclerviewState)
-            }
-        }
+//        lifecycleScope.launch {
+////            venueListAdapter.setState(LoadingState.LOADED)
+//            delay(50)
+//            ranksAdapter.submitList(items)
+//            rankRecycler.layoutManager?.let {llmanager ->
+//                llmanager.onRestoreInstanceState(recyclerviewState)
+//            }
+//        }
     }
 
     override fun onLoadMore(currentPage: Int) {

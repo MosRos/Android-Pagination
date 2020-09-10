@@ -16,8 +16,9 @@ class RanksAdapter(private var onRankedCoinClicked: (RankedCoin, Int) -> Unit) :
                 return (oldItem.id == newItem.id)
             }
 
-            override fun areContentsTheSame(oldItem: RankedCoin, newItem: RankedCoin): Boolean = false
-//                oldItem.equals(newItem)
+            override fun areContentsTheSame(oldItem: RankedCoin, newItem: RankedCoin): Boolean {
+                return oldItem.equals(newItem)
+            }
         }
     }
 
@@ -25,6 +26,8 @@ class RanksAdapter(private var onRankedCoinClicked: (RankedCoin, Int) -> Unit) :
         val coin: RankedCoin? = getItem(position)
         coin?.let {
             holder.bind(coin, position, onRankedCoinClicked)
+            holder.databinding.rankedCoin = coin
+            holder.databinding.executePendingBindings()
         }
     }
 
