@@ -3,4 +3,5 @@
     <string name="home">Home</string>
     <string name="jetpack_paging">Jetpack Paging 3</string>
     <string name="manual_pagination">Manual Pagination</string>
+    <string name="manual_rx_pagination">Rx Pagination</string>
 </resources>

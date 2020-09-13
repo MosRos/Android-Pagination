@@ -35,6 +35,10 @@ class HomeFragment : Fragment() {
             btnManualPagination.setOnClickListener {
                 Navigation.findNavController(homeBinding.root).navigate(R.id.action_fragment_home_to_fragment_manual)
             }
+
+            btnRxPagination.setOnClickListener {
+                Navigation.findNavController(homeBinding.root).navigate(R.id.action_fragment_home_to_fragment_rx_pagination)
+            }
         }
     }
 }

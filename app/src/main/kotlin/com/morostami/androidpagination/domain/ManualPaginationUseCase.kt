@@ -2,8 +2,7 @@ package com.morostami.androidpagination.domain
 
 import com.morostami.androidpagination.domain.base.Result
 import com.morostami.androidpagination.domain.model.RankedCoin
-import io.reactivex.rxjava3.core.Flowable
-import io.reactivex.rxjava3.core.Single
+import io.reactivex.Flowable
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

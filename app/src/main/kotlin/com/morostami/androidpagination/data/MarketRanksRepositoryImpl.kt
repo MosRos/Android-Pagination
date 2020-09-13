@@ -9,20 +9,20 @@ import com.morostami.androidpagination.data.remote.RemoteDataSource
 import com.morostami.androidpagination.data.remote.responses.CoinGeckoApiError
 import com.morostami.androidpagination.domain.MarketRanksRepository
 import com.morostami.androidpagination.domain.base.Result
-import com.morostami.androidpagination.domain.model.CoinsRemoteKeys
 import com.morostami.androidpagination.domain.model.RankedCoin
+import io.reactivex.Completable
+import io.reactivex.Flowable
+import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Flowable
-import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Single
-import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.exceptions.OnErrorNotImplementedException
+import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withContext
+import okhttp3.internal.notify
+import timber.log.Timber
 import java.lang.Exception
 import javax.inject.Inject
 
@@ -122,14 +122,25 @@ class MarketRanksRepositoryImpl @Inject constructor(
     }
 
     private fun fetchFromRemote(offset: Int) : Flowable<List<RankedCoin>> {
-        val response = remoteDataSource.getPagedMarketRanksRx(
-            vs_currency = "usd",
-            page = offset,
-            per_page = DEFAULD_PAGE_SIZE
-        )
-            .doOnSuccess{coins -> saveResults(coins, offset)}
+        var response: Single<List<RankedCoin>>? = null
+        try {
+            response = remoteDataSource.getPagedMarketRanksRx(
+                vs_currency = "usd",
+                page = offset,
+                per_page = DEFAULD_PAGE_SIZE
+            ).onErrorReturn() {t ->
+                null
+            }
+        } catch (e: OnErrorNotImplementedException){
+            Timber.e("Repository ${e.message}")
+        } catch (e: Exception) {
+            Timber.e("Repository ${e.message}")
+        }
 
-        return response.toFlowable()
+        if (response != null) {
+            response?.doOnSuccess{coins -> saveResults(coins, offset)}
+        }
+        return response?.toFlowable() ?: loadFromDb(offset)
 
     }
 

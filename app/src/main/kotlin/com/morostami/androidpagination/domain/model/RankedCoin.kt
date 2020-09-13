@@ -68,7 +68,7 @@ data class RankedCoin(
     @SerializedName("total_supply")
     var totalSupply: Double? = null, // null
     @SerializedName("total_volume")
-    var totalVolume: Long? = null, // 14969737842
+    var totalVolume: Double? = null, // 14969737842
 
     @Expose(serialize = false, deserialize = false)
     var pageKey: Int? = null

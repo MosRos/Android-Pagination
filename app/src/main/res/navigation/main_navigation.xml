@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_fragment_home_to_fragment_manual"
             app:destination="@id/fragment_manual" />
+        <action
+            android:id="@+id/action_fragment_home_to_fragment_rx_pagination"
+            app:destination="@id/fragment_rx_pagination" />
     </fragment>
     <fragment
         android:id="@+id/fragment_paging"
@@ -26,5 +29,11 @@
         android:id="@+id/fragment_manual"
         android:name="com.morostami.androidpagination.presentation.ui.manual_pagination.ManualPaginationFragment"
         android:label="@string/manual_pagination"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/fragment_rx_pagination"
+        android:name="com.morostami.androidpagination.presentation.ui.manual_rx.RxPaginationFragment"
+        android:label="@string/manual_rx_pagination"
         tools:layout="@layout/fragment_home" />
 </navigation>

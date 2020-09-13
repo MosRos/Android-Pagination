@@ -7,7 +7,7 @@ import timber.log.Timber
 
 class EndlessScrollListener (
     private val layoutManager: RecyclerView.LayoutManager,
-    private var visibleThreshold: Int = 0, // The minimum amount of items to have below your current scroll position before loading more.
+    private var visibleThreshold: Int = 5, // The minimum amount of items to have below your current scroll position before loading more.
     private val includeEmptyState: Boolean,
     private val loadMoreObserver: LoadMoreObserver
 ) : RecyclerView.OnScrollListener() {

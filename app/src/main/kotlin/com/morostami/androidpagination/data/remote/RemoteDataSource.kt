@@ -3,7 +3,7 @@ package com.morostami.androidpagination.data.remote
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.morostami.androidpagination.data.remote.responses.CoinGeckoApiError
 import com.morostami.androidpagination.domain.model.RankedCoin
-import io.reactivex.rxjava3.core.Single
+import io.reactivex.Single
 import retrofit2.Retrofit
 import javax.inject.Inject
 

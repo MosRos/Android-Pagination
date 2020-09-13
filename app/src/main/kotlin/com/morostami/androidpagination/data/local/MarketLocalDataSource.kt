@@ -13,8 +13,8 @@ import com.morostami.androidpagination.data.local.dao.CryptoMarketDao
 import com.morostami.androidpagination.data.local.dao.RemoteKeysDao
 import com.morostami.androidpagination.domain.model.CoinsRemoteKeys
 import com.morostami.androidpagination.domain.model.RankedCoin
-import io.reactivex.rxjava3.core.Completable
-import io.reactivex.rxjava3.core.Single
+import io.reactivex.Completable
+import io.reactivex.Single
 import javax.inject.Inject
 
 class MarketLocalDataSource @Inject constructor(
