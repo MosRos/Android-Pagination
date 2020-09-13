@@ -11,6 +11,8 @@ package com.morostami.androidpagination.data.local.dao
 import androidx.paging.PagingSource
 import androidx.room.*
 import com.morostami.androidpagination.domain.model.RankedCoin
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Single
 
 @Dao
 interface CryptoMarketDao {
@@ -39,4 +41,15 @@ interface CryptoMarketDao {
 
     @Query("DELETE FROM COINS")
     suspend fun deleteAllRankedCoins()
+
+    // RxJava
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertRankedCoinsRx(coinsList: List<RankedCoin>) : Completable
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertRankedCoinRx(rankedCoin: RankedCoin) : Completable
+
+    @Query("SELECT * FROM COINS ORDER BY marketCapRank ASC LIMIT :limit OFFSET :offset")
+    fun getRankedCoinsListRx(offset: Int, limit: Int): Single<List<RankedCoin>>
+
 }

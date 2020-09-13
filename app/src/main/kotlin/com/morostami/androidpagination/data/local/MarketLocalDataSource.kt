@@ -9,33 +9,36 @@
 package com.morostami.androidpagination.data.local
 
 import androidx.paging.PagingSource
+import com.morostami.androidpagination.data.local.dao.CryptoMarketDao
 import com.morostami.androidpagination.data.local.dao.RemoteKeysDao
 import com.morostami.androidpagination.domain.model.CoinsRemoteKeys
 import com.morostami.androidpagination.domain.model.RankedCoin
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Single
 import javax.inject.Inject
 
 class MarketLocalDataSource @Inject constructor(
-    private val cryptoDataBase: CryptoDataBase) : RemoteKeysDao {
+    private val cryptoDataBase: CryptoDataBase) : RemoteKeysDao, CryptoMarketDao {
 
     private val cryptoMarketDao by lazy { cryptoDataBase.cryptoMarketDao() }
     private val remoteKeysDao by lazy { cryptoDataBase.remoteKeysDao() }
 
     // RankedCoins
-    suspend fun insertRankedCoins(coinsList: List<RankedCoin>) = cryptoMarketDao.insertRankedCoins(coinsList)
+    override suspend fun insertRankedCoins(coinsList: List<RankedCoin>) = cryptoMarketDao.insertRankedCoins(coinsList)
 
-    suspend fun insertRankedCoin(rankedCoin: RankedCoin) = cryptoMarketDao.insertRankedCoin(rankedCoin)
+    override suspend fun insertRankedCoin(rankedCoin: RankedCoin) = cryptoMarketDao.insertRankedCoin(rankedCoin)
 
-    suspend fun getAllRankedCoins(): List<RankedCoin> = cryptoMarketDao.getAllRankedCoins()
+    override suspend fun getAllRankedCoins(): List<RankedCoin> = cryptoMarketDao.getAllRankedCoins()
 
-    suspend fun getRankedCoinsList(offset: Int, limit: Int): List<RankedCoin> = cryptoMarketDao.getRankedCoinsList(offset, limit)
+    override suspend fun getRankedCoinsList(offset: Int, limit: Int): List<RankedCoin> = cryptoMarketDao.getRankedCoinsList(offset, limit)
 
-    fun getPagedRankedCoins(): PagingSource<Int, RankedCoin> = cryptoMarketDao.getPagedRankedCoins()
+    override fun getPagedRankedCoins(): PagingSource<Int, RankedCoin> = cryptoMarketDao.getPagedRankedCoins()
 
-    suspend fun deleteRankedCoin(rankedCoin: RankedCoin) = cryptoMarketDao.deleteRankedCoin(rankedCoin)
+    override suspend fun deleteRankedCoin(rankedCoin: RankedCoin) = cryptoMarketDao.deleteRankedCoin(rankedCoin)
 
-    suspend fun deleteRankedCoins(coinsList: List<RankedCoin>) = cryptoMarketDao.deleteRankedCoins(coinsList)
+    override suspend fun deleteRankedCoins(coinsList: List<RankedCoin>) = cryptoMarketDao.deleteRankedCoins(coinsList)
 
-    suspend fun deleteAllRankedCoins() = cryptoMarketDao.deleteAllRankedCoins()
+    override suspend fun deleteAllRankedCoins() = cryptoMarketDao.deleteAllRankedCoins()
 
     suspend fun getRemoteKeysCoinId(coinId: String): CoinsRemoteKeys? = remoteKeysDao.remoteKeysCoinId(coinId)
 
@@ -46,4 +49,10 @@ class MarketLocalDataSource @Inject constructor(
     override suspend fun remoteKeysCoinId(coinId: String): CoinsRemoteKeys? = remoteKeysDao.remoteKeysCoinId(coinId)
 
     override suspend fun clearCoinsRemoteKeys() = remoteKeysDao.clearCoinsRemoteKeys()
+
+    override fun insertRankedCoinsRx(coinsList: List<RankedCoin>): Completable = cryptoMarketDao.insertRankedCoinsRx(coinsList)
+
+    override fun insertRankedCoinRx(rankedCoin: RankedCoin): Completable = cryptoMarketDao.insertRankedCoinRx(rankedCoin)
+
+    override fun getRankedCoinsListRx(offset: Int, limit: Int): Single<List<RankedCoin>> = cryptoMarketDao.getRankedCoinsListRx(offset, limit)
 }

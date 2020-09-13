@@ -11,9 +11,12 @@ package com.morostami.androidpagination.domain
 import androidx.paging.PagingData
 import com.morostami.androidpagination.domain.base.Result
 import com.morostami.androidpagination.domain.model.RankedCoin
+import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Single
 import kotlinx.coroutines.flow.Flow
 
 interface MarketRanksRepository {
     fun getPagedRanks() : Flow<PagingData<RankedCoin>>
     fun getRanks(offset: Int) : Flow<Result<List<RankedCoin>>>
+    fun getRanksRx(offset: Int) : Flowable<List<RankedCoin>>
 }

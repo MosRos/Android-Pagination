@@ -11,6 +11,7 @@ package com.morostami.androidpagination.data.remote
 import com.haroldadmin.cnradapter.NetworkResponse
 import com.morostami.androidpagination.data.remote.responses.CoinGeckoApiError
 import com.morostami.androidpagination.domain.model.RankedCoin
+import io.reactivex.rxjava3.core.Single
 import retrofit2.http.GET
 import retrofit2.http.Query
 
@@ -22,4 +23,12 @@ interface CoinGeckoService {
         @Query("page") page: Int,
         @Query("per_page") per_page: Int
         ) : NetworkResponse<List<RankedCoin>, CoinGeckoApiError>
+
+
+    @GET("coins/markets")
+    fun getPagedMarketRanksRx(
+        @Query("vs_currency") vs_currency: String,
+        @Query("page") page: Int,
+        @Query("per_page") per_page: Int
+    ) : Single<List<RankedCoin>>
 }
