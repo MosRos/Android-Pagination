@@ -7,10 +7,10 @@ import com.haroldadmin.cnradapter.NetworkResponse
 import com.morostami.androidpagination.data.local.MarketLocalDataSource
 import com.morostami.androidpagination.data.remote.RemoteDataSource
 import com.morostami.androidpagination.data.remote.responses.CoinGeckoApiError
+import com.morostami.androidpagination.data.utils.NetworkUtils
 import com.morostami.androidpagination.domain.MarketRanksRepository
 import com.morostami.androidpagination.domain.base.Result
 import com.morostami.androidpagination.domain.model.RankedCoin
-import io.reactivex.Completable
 import io.reactivex.Flowable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
@@ -21,7 +21,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import okhttp3.internal.notify
 import timber.log.Timber
 import java.lang.Exception
 import javax.inject.Inject
@@ -55,107 +54,98 @@ class MarketRanksRepositoryImpl @Inject constructor(
         return flow {
             emit(Result.Loading)
             val localData = marketLocalDataSource.getRankedCoinsList(offset, PAGE_SIZE)
-            if (!localData.isNullOrEmpty()){
+            if (!localData.isNullOrEmpty()) {
                 emit(Result.Success(localData))
             }
             val networkRespons: NetworkResponse<List<RankedCoin>, CoinGeckoApiError> =
-                remoteDataSource.getPagedMarketRanks(vs_currency = "usd", page = offset, per_page = PAGE_SIZE)
+                remoteDataSource.getPagedMarketRanks(
+                    vs_currency = "usd",
+                    page = offset,
+                    per_page = PAGE_SIZE
+                )
 
-            when(networkRespons) {
+            when (networkRespons) {
                 is NetworkResponse.Success -> {
-                    GlobalScope.async(Dispatchers.IO){
-                        networkRespons.body.forEach { rank ->
-                            marketLocalDataSource.insertRankedCoin(rank)
-                        }
-                    }
-                    emit(Result.Success(networkRespons.body))
+                    val coins: List<RankedCoin> = networkRespons.body
+                    saveResults(coins, offset)
+                    emit(Result.Success(coins))
                 }
-                else -> {emit(Result.Error(Exception("Bla")))}
+                else -> {
+                    emit(Result.Error(Exception("Bla")))
+                }
             }
         }
-//        return object : NetworkBoundResource<List<RankedCoin>, List<RankedCoin>, CoinGeckoApiError>(){
-//            init {
-//                limit = DEFAULD_PAGE_SIZE
-//            }
-//            override suspend fun getFromDatabase(
-//                isRefreshed: Boolean,
-//                limit: Int,
-//                offset: Int
-//            ): List<RankedCoin>? {
-//                return marketLocalDataSource.getRankedCoinsList(offset, DEFAULD_PAGE_SIZE)
-//            }
-//
-//            override suspend fun validateCache(cachedData: List<RankedCoin>?): Boolean {
-//                return !cachedData.isNullOrEmpty()
-//            }
-//
-//            override suspend fun getFromApi(): NetworkResponse<List<RankedCoin>, CoinGeckoApiError> {
-//                return remoteDataSource.getPagedMarketRanks("usd", offset, DEFAULD_PAGE_SIZE)
-//            }
-//
-//            override suspend fun persistData(apiData: List<RankedCoin>) {
-//                withContext(Dispatchers.IO){
-//                    apiData.forEach { coin ->
-//                        coin?.apply {
-//                            pageKey = offset
-//                        }
-//                        marketLocalDataSource.insertRankedCoin(coin)
-//                    }
-//                }
-//            }
-//
-//
-//        }.flow()
     }
 
     override fun getRanksRx(offset: Int): Flowable<List<RankedCoin>> {
-        val responseObservable = Flowable.concatArray(
-            loadFromDb(offset),
-            fetchFromRemote(offset)
+
+        return if (NetworkUtils.isOnline()) {
+            Flowable.concatArrayEager(
+                loadFromDb(offset),
+                fetchFromRemote(offset)
+            )
+        } else {
+            loadFromDb(offset)
+        }
+    }
+
+    private fun loadFromDb(offset: Int): Flowable<List<RankedCoin>> {
+        return marketLocalDataSource.getRankedCoinsListRx(
+            offset = offset,
+            limit = DEFAULD_PAGE_SIZE
         )
-
-        return responseObservable
+            .onErrorReturn() {
+                listOf()
+            }
+            .toFlowable()
     }
 
-    private fun loadFromDb(offset: Int) : Flowable<List<RankedCoin>> {
-        return marketLocalDataSource.getRankedCoinsListRx(offset = offset, limit = DEFAULD_PAGE_SIZE).toFlowable()
+    private fun loadFromDbSync(offset: Int) : List<RankedCoin> {
+        return marketLocalDataSource.getRankedCoinsListSync(
+            offset = offset,
+            limit = DEFAULD_PAGE_SIZE
+        )
     }
 
-    private fun fetchFromRemote(offset: Int) : Flowable<List<RankedCoin>> {
+    private fun fetchFromRemote(offset: Int): Flowable<List<RankedCoin>> {
         var response: Single<List<RankedCoin>>? = null
         try {
             response = remoteDataSource.getPagedMarketRanksRx(
                 vs_currency = "usd",
                 page = offset,
                 per_page = DEFAULD_PAGE_SIZE
-            ).onErrorReturn() {t ->
+            ).onErrorReturn() { t ->
                 null
+            }.doOnSuccess { coins ->
+                saveResults(coins, offset)
             }
-        } catch (e: OnErrorNotImplementedException){
+        } catch (e: OnErrorNotImplementedException) {
             Timber.e("Repository ${e.message}")
         } catch (e: Exception) {
             Timber.e("Repository ${e.message}")
         }
 
-        if (response != null) {
-            response?.doOnSuccess{coins -> saveResults(coins, offset)}
+        if (response == null)  {
+            response = marketLocalDataSource.getRankedCoinsListRx(
+                offset = offset,
+                limit = DEFAULD_PAGE_SIZE
+            )
         }
-        return response?.toFlowable() ?: loadFromDb(offset)
+        response?.doOnSuccess { coins ->
+            saveResults(coins, offset)
+        }?.subscribeOn(Schedulers.io())?.subscribe()
 
+        return response?.toFlowable() ?: loadFromDb(offset)
     }
 
     private fun saveResults(coins: List<RankedCoin>, offset: Int) {
-        Completable.fromCallable {
-            coins.forEach { coin ->
-                val rankedCoin = coin.apply {
-                    pageKey = offset
-                }
-
-                marketLocalDataSource.insertRankedCoinRx(rankedCoin)
+        GlobalScope.async(Dispatchers.IO) {
+            val dbCoins: List<RankedCoin> = coins.map {
+                rankedCoin: RankedCoin -> rankedCoin.apply {
+                pageKey = offset
             }
-
+            }
+            marketLocalDataSource.insertRankedCoins(dbCoins)
         }
-            .observeOn(Schedulers.io())
-            .subscribeOn(Schedulers.io())
     }
 }

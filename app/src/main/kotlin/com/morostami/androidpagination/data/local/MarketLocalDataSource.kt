@@ -52,7 +52,9 @@ class MarketLocalDataSource @Inject constructor(
 
     override fun insertRankedCoinsRx(coinsList: List<RankedCoin>): Completable = cryptoMarketDao.insertRankedCoinsRx(coinsList)
 
-    override fun insertRankedCoinRx(rankedCoin: RankedCoin): Completable = cryptoMarketDao.insertRankedCoinRx(rankedCoin)
+    override fun insertRankedCoinRx(rankedCoin: RankedCoin) = cryptoMarketDao.insertRankedCoinRx(rankedCoin)
 
     override fun getRankedCoinsListRx(offset: Int, limit: Int): Single<List<RankedCoin>> = cryptoMarketDao.getRankedCoinsListRx(offset, limit)
+
+    override fun getRankedCoinsListSync(offset: Int, limit: Int): List<RankedCoin> = cryptoMarketDao.getRankedCoinsListSync(offset, limit)
 }

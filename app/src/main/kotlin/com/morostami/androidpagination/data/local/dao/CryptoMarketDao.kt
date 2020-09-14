@@ -47,9 +47,12 @@ interface CryptoMarketDao {
     fun insertRankedCoinsRx(coinsList: List<RankedCoin>) : Completable
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertRankedCoinRx(rankedCoin: RankedCoin) : Completable
+    fun insertRankedCoinRx(rankedCoin: RankedCoin)
 
     @Query("SELECT * FROM COINS ORDER BY marketCapRank ASC LIMIT :limit OFFSET :offset")
     fun getRankedCoinsListRx(offset: Int, limit: Int): Single<List<RankedCoin>>
+
+    @Query("SELECT * FROM COINS ORDER BY marketCapRank ASC LIMIT :limit OFFSET :offset")
+    fun getRankedCoinsListSync(offset: Int, limit: Int): List<RankedCoin>
 
 }
