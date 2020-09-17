@@ -99,16 +99,6 @@ class RxPaginationFragment : Fragment(), LoadMoreObserver {
         rankRecycler.layoutManager?.let {llmanager ->
             llmanager.onRestoreInstanceState(recyclerviewState)
         }
-
-        // for smooth performance
-//        lifecycleScope.launch {
-////            venueListAdapter.setState(LoadingState.LOADED)
-//            delay(50)
-//            ranksAdapter.submitList(items)
-//            rankRecycler.layoutManager?.let {llmanager ->
-//                llmanager.onRestoreInstanceState(recyclerviewState)
-//            }
-//        }
     }
 
     override fun onLoadMore(currentPage: Int) {
@@ -118,10 +108,5 @@ class RxPaginationFragment : Fragment(), LoadMoreObserver {
 
     override fun onLoadingStateChanged(loading: Boolean) {
         Toast.makeText(mContext, "Loading State changed $loading", Toast.LENGTH_SHORT).show()
-//        if (loading){
-//            venueListAdapter.setState(LoadingState.LOADING)
-//        } else {
-//            venueListAdapter.setState(LoadingState.LOADED)
-//        }
     }
 }

@@ -27,7 +27,7 @@ interface CryptoMarketDao {
     @Query("SELECT * FROM COINS ORDER BY marketCapRank ASC")
     suspend fun getAllRankedCoins(): List<RankedCoin>
 
-    @Query("SELECT * FROM COINS ORDER BY marketCapRank ASC LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM COINS WHERE pageKey = :offset ORDER BY marketCapRank ASC LIMIT :limit")
     suspend fun getRankedCoinsList(offset: Int, limit: Int): List<RankedCoin>
 
     @Query("SELECT * FROM COINS ORDER BY marketCapRank ASC")
@@ -49,7 +49,7 @@ interface CryptoMarketDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insertRankedCoinRx(rankedCoin: RankedCoin)
 
-    @Query("SELECT * FROM COINS ORDER BY marketCapRank ASC LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM COINS WHERE pageKey = :offset ORDER BY marketCapRank ASC LIMIT :limit")
     fun getRankedCoinsListRx(offset: Int, limit: Int): Single<List<RankedCoin>>
 
     @Query("SELECT * FROM COINS ORDER BY marketCapRank ASC LIMIT :limit OFFSET :offset")

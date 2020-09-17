@@ -12,6 +12,7 @@ import com.morostami.androidpagination.domain.MarketRanksRepository
 import com.morostami.androidpagination.domain.base.Result
 import com.morostami.androidpagination.domain.model.RankedCoin
 import io.reactivex.Flowable
+import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.exceptions.OnErrorNotImplementedException
@@ -77,47 +78,51 @@ class MarketRanksRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getRanksRx(offset: Int): Flowable<List<RankedCoin>> {
+    override fun getRanksRx(offset: Int): Observable<List<RankedCoin>> {
+        var apiResponse: Observable<List<RankedCoin>>? = null
 
-        return if (NetworkUtils.isOnline()) {
-            Flowable.concatArrayEager(
-                loadFromDb(offset),
-                fetchFromRemote(offset)
-            )
-        } else {
-            loadFromDb(offset)
+        if (NetworkUtils.isConnected()) {
+            apiResponse = fetchFromRemote(offset)
+
         }
+        var dbResponse: Observable<List<RankedCoin>> = loadFromDb(offset)
+
+        return if (NetworkUtils.isConnected()) Observable.concatArrayEager(
+            dbResponse,
+            apiResponse
+        ) else dbResponse
     }
 
-    private fun loadFromDb(offset: Int): Flowable<List<RankedCoin>> {
-        return marketLocalDataSource.getRankedCoinsListRx(
+    private fun loadFromDb(offset: Int): Observable<List<RankedCoin>> {
+        return marketLocalDataSource
+            .getRankedCoinsListRx(
             offset = offset,
-            limit = DEFAULD_PAGE_SIZE
-        )
+            limit = DEFAULD_PAGE_SIZE)
+            .toObservable()
             .onErrorReturn() {
                 listOf()
             }
-            .toFlowable()
+            .doOnNext {coins ->
+                //Print log it.size :)
+                Timber.e("REPOSITORY DB *** ${coins.size}")
+            }
+
     }
 
-    private fun loadFromDbSync(offset: Int) : List<RankedCoin> {
-        return marketLocalDataSource.getRankedCoinsListSync(
-            offset = offset,
-            limit = DEFAULD_PAGE_SIZE
-        )
-    }
-
-    private fun fetchFromRemote(offset: Int): Flowable<List<RankedCoin>> {
-        var response: Single<List<RankedCoin>>? = null
+    private fun fetchFromRemote(offset: Int): Observable<List<RankedCoin>> {
+        var response: Observable<List<RankedCoin>>? = null
         try {
-            response = remoteDataSource.getPagedMarketRanksRx(
+            response = remoteDataSource
+                .getPagedMarketRanksRx(
                 vs_currency = "usd",
                 page = offset,
-                per_page = DEFAULD_PAGE_SIZE
-            ).onErrorReturn() { t ->
+                per_page = DEFAULD_PAGE_SIZE)
+                .toObservable()
+                .onErrorReturn() { t ->
                 null
-            }.doOnSuccess { coins ->
-                saveResults(coins, offset)
+            }.doOnNext { coins ->
+                    Timber.e("REPOSITORY API *** ${coins.size}")
+                    saveResults(coins, offset)
             }
         } catch (e: OnErrorNotImplementedException) {
             Timber.e("Repository ${e.message}")
@@ -125,17 +130,7 @@ class MarketRanksRepositoryImpl @Inject constructor(
             Timber.e("Repository ${e.message}")
         }
 
-        if (response == null)  {
-            response = marketLocalDataSource.getRankedCoinsListRx(
-                offset = offset,
-                limit = DEFAULD_PAGE_SIZE
-            )
-        }
-        response?.doOnSuccess { coins ->
-            saveResults(coins, offset)
-        }?.subscribeOn(Schedulers.io())?.subscribe()
-
-        return response?.toFlowable() ?: loadFromDb(offset)
+        return response ?: loadFromDb(offset)
     }
 
     private fun saveResults(coins: List<RankedCoin>, offset: Int) {
