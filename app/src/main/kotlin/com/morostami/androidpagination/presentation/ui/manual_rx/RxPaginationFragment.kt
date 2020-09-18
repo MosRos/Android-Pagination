@@ -15,7 +15,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.morostami.androidpagination.R
 import com.morostami.androidpagination.databinding.FragmentMarketRankBinding
 import com.morostami.androidpagination.domain.model.RankedCoin
-import com.morostami.androidpagination.presentation.ui.manual_pagination.*
+import com.morostami.androidpagination.presentation.ui.manual_pagination.EndlessScrollListener
+import com.morostami.androidpagination.presentation.ui.manual_pagination.LoadMoreObserver
+import com.morostami.androidpagination.presentation.ui.manual_pagination.RanksAdapter
+import com.morostami.androidpagination.presentation.ui.manual_pagination.disableAnimation
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
